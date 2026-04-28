@@ -17,7 +17,7 @@ else:
     st.error("Secrets에 GOOGLE_API_KEY를 등록해 주세요.")
     st.stop()
 
-# 3. 고감도 디자인 및 오류 수정 (Instructions 제거 필수 반영)
+# 3. 고감도 디자인 및 'keyboard_double' 안내 문구 완전 제거 (강력한 버전)
 st.markdown("""
     <style>
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -25,9 +25,15 @@ st.markdown("""
     * { font-family: 'Pretendard', sans-serif !important; }
     .main { background-color: #fcfaf7; }
     
-    /* [수정] 입력창 안내 문구(keyboard_double 등) 완전 제거 */
-    [data-testid="stInstructions"] {
+    /* [긴급 수정] 모든 형태의 단축키 안내 및 'keyboard_double' 텍스트 강제 숨김 */
+    [data-testid="stInstructions"], 
+    .st-emotion-cache-16ids9d, 
+    .st-emotion-cache-1vt4yug,
+    small {
         display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        padding: 0 !important;
     }
 
     /* 사이드바 스타일 */
@@ -157,7 +163,6 @@ if analyze_btn:
         except Exception as e:
             st.error(f"분석 중 오류 발생: {e}")
 else:
-    # 7. [수정] 초기 대기 화면 (사용자 요청 문구 반영)
     st.markdown("""
         <div style='padding: 80px 40px; background-color: white; border-radius: 20px; border: 1px solid #f0f2f6; text-align: center;'>
             <div style='font-size: 50px; margin-bottom: 25px;'>⚖️</div>
