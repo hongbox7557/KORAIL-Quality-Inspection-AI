@@ -1,19 +1,36 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. 페이지 설정 (브라우저 탭 제목 및 아이콘)
-st.set_page_config(page_title="품질검사 법률/기술 자문 시스템", page_icon="⚖️")
+# 1. 페이지 설정
+st.set_page_config(page_title="KORAIL 품질검사 자문 시스템", page_icon="⚖️")
 
-# 2. API 설정 (Streamlit Secrets 사용)
+# 2. API 및 시스템 프롬프트 설정
+# 시스템 프롬프트는 AI에게 전문가라는 정체성과 구체적인 출력 가이드라인을 부여합니다.
+SYSTEM_INSTRUCTION = """
+당신은 한국철도공사(KORAIL)의 품질검사 및 법률 자문 전문가입니다.
+사용자의 현안에 대해 한국철도공사 사규, 기술규격(KRCS 등), 국가계약법 및 시행령을 근거로 답변해야 합니다.
+
+[필수 준수 사항]
+- 모든 분석 근거에는 반드시 구체적인 '법령 조항 번호'나 '사무분장/사규 명칭'을 명시할 것.
+- 답변은 전문적이고 객관적인 문어체로 작성할 것.
+- 5번 항목에는 분석에 활용된 실제 법령이나 사규의 명칭을 정확히 나열할 것.
+"""
+
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-model = genai.GenerativeModel('gemini-3-flash-preview')
 
-# 3. 메인 화면 헤더 및 설명
+# 사용자의 요청대로 gemini-3-flash-preview 모델을 유지합니다.
+# 해당 모델이 지원되지 않는 환경이라면 라이브러리 업데이트가 필요할 수 있습니다.
+model = genai.GenerativeModel(
+    model_name='gemini-3-flash-preview',
+    system_instruction=SYSTEM_INSTRUCTION
+)
+
+# 3. UI 구성 (사용자가 요청한 첫 화면 텍스트 반영)
 st.title("⚖️ 품질검사 현안 자문 시스템")
 st.subheader("품질검사 현안을 객관적 규정으로 지원합니다.")
 
 st.info("""
-협력사와의 품질 기준 해석 차이나 난항 상황에 대해 **한국철도공사 사규, 기술규격 및 국가계약법**을 근거로 
+협력사와의 품질 기준 해석 차이나 난항 상황에 대해 **한국철도공사 사규, 기술규격 및 국가계약법**을 근거로 
 기술·법률 자문과 객관적 가이드라인을 제공합니다.
 """)
 
@@ -36,27 +53,30 @@ if submit_button:
     if not (item_name and issue_reason and partner_claim and goal):
         st.warning("모든 항목을 입력해야 정확한 분석이 가능합니다.")
     else:
-        # 프롬프트 구성 (AI에게 역할 부여)
-        prompt = f"""
-        당신은 한국철도공사(KORAIL)의 품질검사 및 법률 자문 전문가입니다. 
-        다음 정보를 바탕으로 사규, 기술규격, 국가계약법에 근거하여 객관적인 가이드라인을 작성하세요.
+        # 사용자 프롬프트: 요청하신 5가지 목차를 강제합니다.
+        user_prompt = f"""
+        다음 정보를 바탕으로 KORAIL 품질검사 자문 보고서를 작성하세요.
         
         1. 대상 품목: {item_name}
         2. 공사 입장: {issue_reason}
         3. 협력사 주장: {partner_claim}
-        4. 난항 지점 및 목표: {goal}
+        4. 현재 난항 및 목표: {goal}
         
-        [분석 요청 사항]
-        - 관련 사규 및 법적 근거 제시
-        - 양측 주장의 쟁점 분석
-        - 향후 조치 방향에 대한 객관적 권고안
+        [작성 목차]
+        1. 상황 요약 및 핵심 쟁점 분석
+        2. 적용 규정 및 근거 제시 (반드시 관련 법령/사규의 구체적인 '조항 번호' 포함)
+        3. 객관적 협의 방향 제시
+        4. 해결을 위한 구체적인 조치
+        5. 참고한 규정 및 온라인 자료
         """
         
-        with st.spinner("규정을 분석 중입니다..."):
+        with st.spinner("전문적인 규정 분석을 진행 중입니다..."):
             try:
-                response = model.generate_content(prompt)
+                response = model.generate_content(user_prompt)
                 st.markdown("---")
-                st.markdown("### 🔍 분석 결과")
-                st.write(response.text)
+                st.markdown("### 🔍 품질검사 규정 자문 결과")
+                # AI 답변 출력
+                st.markdown(response.text)
             except Exception as e:
                 st.error(f"오류가 발생했습니다: {e}")
+                st.info("Tip: 만약 404 오류가 지속된다면 모델명을 'gemini-1.5-flash'로 변경해 보세요.")
