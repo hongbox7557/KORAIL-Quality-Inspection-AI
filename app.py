@@ -6,13 +6,13 @@ import traceback
 st.set_page_config(page_title="KORAIL 품질검사 솔루션", layout="wide", page_icon="🚆")
 
 # API 설정
-if "GOOGLE_API_KEY" not in st.secrets:
-    st.error("Streamlit Secrets에 GOOGLE_API_KEY를 등록해 주세요.")
+if "GEMINI_API_KEY" not in st.secrets:
+    st.error("Streamlit Secrets에 GEMINI_API_KEY를 등록해 주세요.")
     st.stop()
 
 try:
-    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    model = genai.GenerativeModel('gemini-3.0-flash')
 except Exception as e:
     st.error(f"모델 연결 오류: {e}")
     st.stop()
