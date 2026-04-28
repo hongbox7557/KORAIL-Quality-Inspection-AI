@@ -1,2 +1,18 @@
 streamlit
-google-generativeai>=0.5.0
+    google-generativeai>=0.5.0
+    ```
+  
+  
+    코드에서 모델명을 적을 때 정식 경로인 `models/`를 반드시 포함하세요. `v1beta` 에러를 피하는 가장 확실한 방법입니다.
+    ```python
+    # 수정 전: model_name="gemini-1.5-flash"
+    # 수정 후
+    model = genai.GenerativeModel(
+        model_name="models/gemini-1.5-flash", 
+        generation_config=generation_config,
+        system_instruction=SYSTEM_PROMPT
+    )
+    ```
+  
+  
+    코드 수정 후 단순히 새로고침만 하지 마세요. 대시보드에서 **[Reboot App]**을 눌러야 새로운 라이브러리 설정이 서버에 반영됩니다.
