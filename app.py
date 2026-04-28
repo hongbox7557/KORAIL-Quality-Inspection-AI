@@ -2,14 +2,13 @@ import streamlit as st
 import google.generativeai as genai
 import time
 
-# 1. 페이지 설정 (브라우저 탭 아이콘을 KORAIL 로고 톤으로 변경 가능)
+# 1. 페이지 설정 및 브라우저 타이틀
 st.set_page_config(page_title="KORAIL 품질검사 현안 솔루션", layout="wide", page_icon="🚆")
 
-# 2. API 설정
+# 2. API 설정 (최신 gemini-3-flash-preview 모델 반영)
 if "GOOGLE_API_KEY" in st.secrets:
     try:
         genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-        # 최신 프레뷰 모델 사용
         model = genai.GenerativeModel('gemini-3-flash-preview')
     except Exception as e:
         st.error(f"모델 연결 중 오류가 발생했습니다: {e}")
@@ -18,183 +17,181 @@ else:
     st.error("Secrets에서 GOOGLE_API_KEY를 설정해주세요.")
     st.stop()
 
-# 3. KORAIL 브랜드 기반 커스텀 CSS (세련된 디자인)
-korail_blue = "#0054A6" # 코레일 메인 블루
-korail_red = "#E60012"  # 코레일 포인트 레드
-bg_beige = "#FDFBF5"    # 샌드 베이지 배경
+# 3. KORAIL 브랜드 아이덴티티 및 세련된 폰트 설정 (CSS)
+korail_blue = "#0054A6"
+korail_red = "#E60012"
+bg_light = "#F8F9FA"
 
 st.markdown(f"""
     <style>
-    /* 전체 배경 및 폰트 */
-    .main {{ background-color: {bg_beige}; color: #333; }}
+    /* 폰트 및 기본 스타일 설정: 가독성이 뛰어난 프리텐다드/나눔스퀘어 스타일 스택 */
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
     
-    /* 사이드바 스타일 (블루 톤) */
-    section[data-testid="stSidebar"] {{ 
-        background-color: white !important; 
-        width: 500px !important; 
-        border-right: 1px solid #e0e0e0;
-        padding-top: 2rem;
+    html, body, [class*="css"] {{
+        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif !important;
     }}
-    section[data-testid="stSidebar"] .stMarkdown h1 {{ color: {korail_blue}; }}
+
+    .main {{ background-color: {bg_light}; }}
+
+    /* 사이드바 디자인: 입력 가독성 강화 */
+    section[data-testid="stSidebar"] {{
+        background-color: #ffffff !important;
+        border-right: 1px solid #e9ecef;
+        padding: 2rem 1rem;
+    }}
     
-    /* 입력창 디자인 (세련된 테두리) */
-    .stTextArea textarea {{ 
-        min-height: 250px !important; 
-        border-radius: 10px !important;
-        border: 1px solid #d1d1d1 !important;
-        background-color: white !important;
+    /* 텍스트 입력창: 넉넉한 여백과 세련된 테두리 */
+    .stTextArea textarea {{
+        min-height: 250px !important;
+        border-radius: 12px !important;
+        border: 1px solid #dee2e6 !important;
+        padding: 15px !important;
         font-size: 15px !important;
+        line-height: 1.6 !important;
     }}
-    .stTextArea textarea:focus {{ border: 2px solid {korail_blue} !important; }}
+    .stTextArea textarea:focus {{
+        border-color: {korail_blue} !important;
+        box-shadow: 0 0 0 2px rgba(0, 84, 166, 0.1) !important;
+    }}
+
+    /* 버튼 디자인: KORAIL 블루 및 호버 효과 */
+    .stButton>button {{
+        height: 55px;
+        background-color: {korail_blue} !important;
+        color: white !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        font-size: 17px !important;
+        transition: 0.3s ease;
+        border: none !important;
+    }}
+    .stButton>button:hover {{
+        background-color: #003d7a !important;
+        box-shadow: 0 4px 12px rgba(0, 84, 166, 0.2);
+    }}
+
+    /* 결과 카드: 전문가 보고서 느낌의 화이트 레이아웃 */
+    .result-card {{
+        background-color: #ffffff;
+        padding: 40px;
+        border-radius: 16px;
+        border: 1px solid #edf2f7;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.04);
+        line-height: 1.8;
+    }}
     
-    /* 분석 버튼 (코레일 블루) */
-    .stButton>button {{ 
-        height: 60px; 
-        font-weight: bold; 
-        font-size: 19px !important;
-        background-color: {korail_blue} !important; 
-        color: white !important; 
-        border: none;
+    .status-box {{
+        padding: 25px;
         border-radius: 12px;
-        transition: all 0.3s;
+        background-color: white;
+        border-left: 5px solid {korail_blue};
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }}
-    .stButton>button:hover {{ background-color: #003F7F !important; transform: translateY(-2px); }}
-    
-    /* 분석 결과 카드 디자인 */
-    .result-card {{ 
-        padding: 40px; 
-        border-radius: 20px; 
-        background-color: white; 
-        border: 1px solid #f0f0f0;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        line-height: 1.9;
-        font-size: 16px;
-    }}
-    
-    /* 메인 타이틀 (세련된 서체 느낌) */
-    .stApp h1 {{ font-weight: 800; color: #1a1a1a; }}
-    .stApp h3 {{ color: {korail_blue}; font-weight: 600; }}
-    
-    /* 로딩 애니메이션 커스텀 */
-    .stSpinner {{ color: {korail_red} !important; }}
     </style>
     """, unsafe_allow_html=True)
 
-# 4. 사이드바: 입력 폼
+# 4. 사이드바 구성
 with st.sidebar:
-    st.markdown("# 🚄 현안 데이터 입력")
-    st.markdown("정확하고 객관적인 자문을 위해 아래 항목을 상세히 입력해주세요.")
+    st.markdown(f"<h1 style='color: {korail_blue}; font-size: 26px;'>📋 현안 데이터 입력</h1>", unsafe_allow_html=True)
+    st.markdown("규정에 근거한 정확한 분석을 위해 상세 내용을 입력해 주세요.")
     st.markdown("---")
     
-    item = st.text_input("1. 검사 대상 품목", placeholder="예: 선로 전환기용 모터, 차량용 윤축 등")
+    item = st.text_input("1. 검사 대상 품목", placeholder="예: 고속열차용 제동 패드")
+    reason = st.text_area("2. 검사 불합격 및 지적 사유 (공사 입장)", height=200, placeholder="기술규격서 위반 사항 등을 기재")
+    claim = st.text_area("3. 협력사 주장 내용", height=200, placeholder="이의 신청 사유 또는 현장 상황")
+    goal = st.text_area("4. 현재 난항 지점 및 목표", height=150, placeholder="해결하고자 하는 핵심 쟁점")
     
-    reason = st.text_area("2. 검사 불합격 및 지적 사유 (공사 입장)", 
-                         placeholder="기술규격서 제○조 미흡, 도면 불일치 등 상세 기술", height=200)
-    
-    claim = st.text_area("3. 협력사 주장 내용", 
-                        placeholder="현장 여건 불가피성, 규정 해석 이견 등", height=200)
-    
-    goal = st.text_area("4. 현재 난항 지점 및 목표", 
-                       placeholder="의사결정 쟁점 및 해결하고자 하는 방향", height=150)
-    
-    # KORAIL 레드 포인트 버튼
     analyze_btn = st.button("⚖️ 규정 기반 정밀 분석", use_container_width=True)
 
-# 5. 메인 화면 구성
-# KORAIL 로고 느낌을 주는 타이틀 디자인
+# 5. 메인 화면 헤더
 st.markdown(f"""
-    <div style='display: flex; align-items: center; margin-bottom: 20px;'>
-        <div style='width: 8px; height: 40px; background-color: {korail_blue}; margin-right: 15px; border-radius: 4px;'></div>
-        <h1 style='margin: 0; font-size: 36px;'>품질검사 현안 솔루션</h1>
+    <div style='display: flex; align-items: center;'>
+        <div style='background-color: {korail_blue}; width: 6px; height: 35px; border-radius: 3px; margin-right: 15px;'></div>
+        <h1 style='font-size: 32px; margin: 0;'>품질검사 현안 솔루션</h1>
     </div>
-    <h3 style='margin-left: 23px; margin-top: -10px; font-weight: 500;'>한국철도공사 사규 · 기술규격 · 국가계약법 기반 자문</h3>
-    <hr style='border: 1px solid #e0e0e0; margin: 30px 0;'>
+    <p style='margin-left: 21px; color: #666; font-size: 18px; margin-top: 5px;'>한국철도공사 사규 · 기술규격 · 국가계약법 통합 자문 시스템</p>
+    <hr style='margin-top: 20px; margin-bottom: 40px; border: 0.5px solid #eee;'>
     """, unsafe_allow_html=True)
 
+# 6. 분석 로직
 if analyze_btn:
     if not all([item, reason, claim, goal]):
-        st.warning("상세한 분석을 위해 모든 항목(1~4번)을 입력해주세요.")
+        st.warning("분석을 시작하려면 1번부터 4번까지 모든 항목을 입력해야 합니다.")
     else:
-        # --- 분석 중 UI 표현 ---
-        with st.spinner("KORAIL 사규 및 국가계약법 사례를 정밀 검색 중입니다... 잠시만 기다려 주세요."):
-            # 상태 표시 전용 공간
-            status_box = st.empty()
-            status_box.markdown(f"""
-                <div style='padding: 20px; border-radius: 10px; background-color: white; border: 1px solid {korail_blue}; text-align: center;'>
-                    <span style='color: {korail_blue}; font-size: 18px; font-weight: bold;'>🔄 규정 및 법령 사례를 분석 중입니다...</span><br>
-                    <span style='color: #666; font-size: 14px;'>시스템이 한국철도공사 사규집과 국가계약법 온라인 DB를 참조하고 있습니다.</span>
+        # 분석 중 UI 표현
+        status_placeholder = st.empty()
+        with status_placeholder:
+            st.markdown(f"""
+                <div class="status-box">
+                    <h4 style="color: {korail_blue}; margin: 0;">🔄 분석 진행 중...</h4>
+                    <p style="margin: 10px 0 0 0; color: #555;">공사 사규집 및 법제처 국가법령정보 DB로부터 관련 근거를 검색하고 있습니다.</p>
                 </div>
             """, unsafe_allow_html=True)
-            
-            # (시각적 효과를 위한 아주 짧은 지연)
-            time.sleep(1)
+            time.sleep(1.5)
 
-            # 지시사항: 자문단 명칭 금지, 법무팀 절차 안내 강제, 참고 규정 명시
-            prompt = (
-                f"당신은 품질검사 규정 및 법률 분석 전문가입니다. 아래 상황을 분석하여 보고서를 작성하세요.\n\n"
-                f"[상황 정보]\n"
-                f"- 품목: {item}\n"
-                f"- 공사 지적: {reason}\n"
-                f"- 협력사 주장: {claim}\n"
-                f"- 목표: {goal}\n\n"
-                f"[작성 지침]\n"
-                f"1. '자문단'이나 '전문가 집단'이라는 표현은 절대 사용하지 마세요.\n"
-                f"2. 한국철도공사 사규, 기술규격, 국가계약법, 공정거래법 등 관련 법령을 근거로 객관적인 판단을 내리세요.\n"
-                f"3. 보고서 마지막에는 반드시 다음과 같은 취지의 안내 문구를 포함하세요:\n"
-                f"   '본 분석 결과로도 현안 해결이 어려울 경우, 법무팀에 공식적인 서면자문을 요청하여 확정적인 법적 판단을 받으시기 바랍니다.'\n"
-                f"4. **가장 중요:** 보고서 마지막 섹션에 '참고한 규정 및 온라인 자료 목록'을 구체적으로 명시하세요. (예: 한국철도공사 기술규격서 제○조, 국가계약법 시행령 제○조, 법제처 판례 등)\n\n"
-                f"[보고서 형식]\n"
-                f"- 관련 규정 검토\n"
-                f"- 주요 쟁점 분석\n"
-                f"- 객관적 가이드라인\n"
-                f"- 향후 조치 권고\n"
-                f"- 참고 규정 및 자료 목록 (구체적 명시)"
-            )
-            
-            try:
-                # AI 모델 호출
-                responses = model.generate_content(prompt)
-                
-                # 분석 중 UI 제거
-                status_box.empty()
-                
-                if responses and responses.text:
-                    st.markdown("### 🔍 규정 기반 정밀 분석 결과")
-                    
-                    # 탭 기능을 활용하여 결과와 참고자료를 분리 (세련된 UX)
-                    tab1, tab2 = st.tabs(["📝 분석 보고서", "📚 참고 규정 및 자료"])
-                    
-                    with tab1:
-                        # 메인 분석 결과 출력
-                        st.markdown(f"<div class='result-card'>{responses.text}</div>", unsafe_allow_html=True)
-                    
-                    with tab2:
-                        # 프롬프트 지시에 따라 도출된 참고 자료 목록을 세련된 카드로 출력
-                        # (응답 텍스트 내의 특정 섹션을 가져오거나, AI가 전체를 다 쓰게 할 수도 있습니다. 
-                        # 여기선 전체 텍스트에 포함된 참고 자료 목록을 그대로 보여줍니다.)
-                        st.markdown("""
-                            <div style='padding: 20px; border-radius: 10px; background-color: #f9f9f9; border: 1px solid #e0e0e0;'>
-                                <h3>📚 주요 참고 문헌</h3>
-                                본 분석에 활용된 한국철도공사 사규, 기술규격 및 관련 법령은 다음과 같습니다.
-                                (상세 내용은 법제처 국가법령정보센터 및 공사 사규 관리 시스템을 참조하시기 바랍니다.)
-                            </div>
-                        """, unsafe_allow_html=True)
-                        st.write(responses.text.split("참고 규정 및 자료 목록")[-1]) # AI 응답의 마지막 섹션만 추출
+        # 프롬프트 설정 (규정 및 자료 목록 도출 강조)
+        prompt = f"""
+        당신은 품질검사 및 관련 법률 분석 전문가입니다. 아래 데이터를 기반으로 전문가 수준의 분석 보고서를 작성하세요.
 
-                else:
-                    st.error("응답 생성에 실패했습니다. 데이터를 다시 확인하고 시도해 주세요.")
-            except Exception as e:
-                status_box.empty()
-                st.error(f"분석 중 기술적 오류 발생: {e}")
+        [분석 데이터]
+        - 품목: {item}
+        - 공사 지적사항: {reason}
+        - 협력사 주장: {claim}
+        - 난항 및 목표: {goal}
+
+        [지시 사항]
+        1. '자문단'이나 '전문가 집단'이라는 표현은 절대 사용하지 마세요.
+        2. 한국철도공사 사규, 해당 품목 기술규격(KRCS 등), 국가계약법 시행령/규칙을 구체적으로 인용하세요.
+        3. 온라인 자료(법제처 판례, 조달청 유권해석 사례 등)가 있다면 함께 참조하세요.
+        4. 보고서 하단에는 반드시 다음 문구를 포함하세요:
+           "본 분석 결과로도 현안 해결이 어려울 경우, 법무팀에 공식적인 서면자문을 요청하여 확정적인 법적 판단을 받으시기 바랍니다."
+        5. 보고서 마지막 섹션에 [참고 규정 및 온라인 자료 목록]을 번호를 매겨 상세히 나열하세요.
+
+        [보고서 구성]
+        I. 관련 규정 및 법령 검토
+        II. 핵심 쟁점 분석
+        III. 객관적 가이드라인 (판단 근거)
+        IV. 실무적 향후 조치 권고
+        V. 참고 규정 및 온라인 자료 목록
+        """
+
+        try:
+            response = model.generate_content(prompt)
+            status_placeholder.empty()
+
+            if response and response.text:
+                st.markdown("### 🔍 정밀 분석 결과")
+                
+                # 탭 레이아웃을 통한 정보 분리
+                res_tab, ref_tab = st.tabs(["📝 분석 보고서", "📚 참고 문헌 및 근거"])
+                
+                with res_tab:
+                    st.markdown(f"<div class='result-card'>{response.text}</div>", unsafe_allow_html=True)
+                
+                with ref_tab:
+                    st.markdown("### 📚 활용된 법령 및 사규 데이터")
+                    st.info("본 보고서 작성 시 참고한 주요 규정 목록입니다.")
+                    # 결과 텍스트 중 마지막 섹션만 추출하여 표시 (V. 섹션 이후)
+                    if "V." in response.text:
+                        ref_content = response.text.split("V.")[-1]
+                        st.markdown(f"<div class='result-card'>{ref_content}</div>", unsafe_allow_html=True)
+                    else:
+                        st.write("상세 참고 자료는 보고서 본문을 확인해 주시기 바랍니다.")
+            else:
+                st.error("응답을 생성할 수 없습니다. 잠시 후 다시 시도해 주세요.")
+        except Exception as e:
+            status_placeholder.empty()
+            st.error(f"분석 중 오류가 발생했습니다: {e}")
 else:
-    # 초기 화면 디자인 (가이드라인 적용)
-    st.markdown(f"""
-        <div style='padding: 40px; border-radius: 15px; background-color: white; border: 1px solid #f0f0f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);'>
-            <h2 style='color: {korail_blue};'>사용 가이드</h2>
-            ---
-            1. 왼쪽 사이드바에 <strong>[분석 상황]</strong>을 상세히 입력해 주세요.<br>
-            2. <strong>[규정 기반 정밀 분석]</strong> 버튼을 클릭하세요.<br>
-            3. 시스템이 KORAIL 사규와 국가계약법 DB를 참조하여 객관적인 가이드라인을 제시합니다.<br><br>
-            <strong style='color: {korail_red};'>주의:</strong> 본 결과는 AI의 규정 해석이며, 최종 결정 시 관련 부서의 법적 검토를 병행하시기 바랍니다.
+    # 대기 화면 가이드
+    st.markdown("""
+        <div style="background-color: white; padding: 40px; border-radius: 15px; border: 1px solid #f0f2f6;">
+            <h4 style="color: #0054A6; margin-bottom: 20px;">💡 시스템 사용 방법</h4>
+            <ol style="line-height: 2;">
+                <li>사이드바에 <strong>품목 및 현황</strong>을 상세히 입력합니다.</li>
+                <li><strong>정밀 분석 시작</strong> 버튼을 클릭합니다.</li>
+                <li>AI가 도출한 <strong>규정 근거와 가이드라인</strong>을 확인합니다.</li>
+                <li>필요 시 <strong>참고 문헌 탭</strong>에서 법적 근거 조항을 확인합니다.</li>
+            </ol>
         </div>
     """, unsafe_allow_html=True)
