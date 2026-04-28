@@ -99,7 +99,7 @@ st.markdown("""
         <h1 style='font-size: 32px; margin: 0; letter-spacing: -0.7px; font-weight: 800;'>품질검사 현안 솔루션</h1>
     </div>
     <p style='margin-left: 24px; color: #718096; font-size: 17px; margin-top: 5px;'>
-        KORAIL 사규 · KRCS 기술규격 · 국가계약법 통합 검토 서비스
+        KORAIL 사규 · 기술규격 · 국가계약법 통합 검토 서비스
     </p>
     <hr style='border: 0.5px solid #edf2f7; margin: 20px 0 25px 0;'>
     """, unsafe_allow_html=True)
