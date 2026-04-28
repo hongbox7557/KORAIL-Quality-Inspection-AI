@@ -20,12 +20,13 @@ genai.configure(api_key=api_key)
 # 3. 모델 설정 (AI Studio의 지침과 설정을 이식)
 # 품질검사의 객관성을 위해 도출 온도를 낮게(0.2) 설정하는 것이 핵심입니다.
 model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
+    model_name="models/gemini-1.5-flash",  # 'models/'를 앞에 붙여주세요
     generation_config={
         "temperature": 0.2,
         "top_p": 0.95,
-        "max_output_tokens": 4096,
     },
+    system_instruction=SYSTEM_PROMPT
+)
     system_instruction="""당신은 한국철도공사의 품질검사 자문 전문가입니다. 
     사용자가 제공하는 4가지 정보를 바탕으로 사규, 기술규격, 국가계약법에 근거하여 
     협력사와의 갈등 상황에 대한 객관적인 가이드라인과 법률·기술적 자문을 제공하십시오."""
