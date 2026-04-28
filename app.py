@@ -1,43 +1,45 @@
 import streamlit as st
 import google.generativeai as genai
-import threading
+import os
 
-st.set_page_config(page_title="API 테스트", layout="wide")
-st.title("🔧 Gemini API 연결 테스트")
+# 1. 페이지 설정 (전문가용 시스템 느낌 내기)
+st.set_page_config(page_title="품질검사 지원 AI", layout="centered")
+st.title("🔍 품질검사 지원 AI 시스템")
+st.info("KORAIL 품질검사 규정 및 법령에 근거하여 답변을 생성합니다.")
 
-if "GOOGLE_API_KEY" not in st.secrets:
-    st.error("❌ API 키 없음")
-    st.stop()
-st.success("✅ STEP 1: API 키 확인됨")
+# 2. 보안 설정 (API 키)
+api_key = os.environ.get("GEMINI_API_KEY")
+genai.configure(api_key=api_key)
 
-try:
-    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    st.success("✅ STEP 2: 모델 연결 성공")
-except Exception as e:
-    st.error(f"❌ STEP 2 실패: {e}")
-    st.stop()
+# 3. [복사한 지침 넣기] AI Studio와 똑같은 성능을 내는 핵심 부분
+SYSTEM_PROMPT = """
+(여기에 AI 스튜디오에서 복사한 지침 내용을 그대로 붙여넣으세요)
+예: 당신은 품질검사 전문가로서...
+"""
 
-# 타임아웃 10초 적용
-st.info("🔄 STEP 3: API 호출 중... (최대 10초)")
-result = {"text": None, "error": None}
+model = genai.GenerativeModel(
+    model_name="gemini-1.5-flash",
+    system_instruction=SYSTEM_PROMPT,
+    generation_config={
+        "temperature": 0.2,  # 품질검사는 정확도가 중요하므로 낮게 설정(0.1~0.3 권장)
+        "top_p": 0.95,
+    }
+)
 
-def call_api():
-    try:
-        response = model.generate_content("안녕이라고만 답해줘")
-        result["text"] = response.text
-    except Exception as e:
-        result["error"] = str(e)
+# 4. 채팅 기록 유지 (이걸 안 하면 질문할 때마다 리셋됩니다)
+if "chat" not in st.session_state:
+    st.session_state.chat = model.start_chat(history=[])
 
-thread = threading.Thread(target=call_api)
-thread.start()
-thread.join(timeout=10)
+# 5. 채팅 화면 구성 (AI Studio와 가장 흡사한 디자인)
+for message in st.session_state.chat.history:
+    role = "assistant" if message.role == "model" else "user"
+    with st.chat_message(role):
+        st.markdown(message.parts[0].text)
 
-if thread.is_alive():
-    st.error("❌ STEP 3 실패: 10초 타임아웃 — 네트워크에서 API 호출이 차단된 것 같습니다.")
-elif result["error"]:
-    st.error(f"❌ STEP 3 실패: {result['error']}")
-elif result["text"]:
-    st.success(f"✅ STEP 3 통과! 응답: {result['text']}")
-else:
-    st.error("❌ STEP 3 실패: 응답이 비어있습니다.")
+if prompt := st.chat_input("검사 항목이나 규정에 대해 물어보세요."):
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    
+    response = st.session_state.chat.send_message(prompt)
+    with st.chat_message("assistant"):
+        st.markdown(response.text)
