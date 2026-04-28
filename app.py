@@ -9,7 +9,7 @@ st.set_page_config(page_title="KORAIL 품질검사 솔루션", layout="wide", pa
 if "GOOGLE_API_KEY" in st.secrets:
     try:
         genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-        model = genai.GenerativeModel('gemini-3-flash-preview')
+        model = genai.GenerativeModel('gemini-2.0-flash')
     except Exception as e:
         st.error(f"모델 연결 오류: {e}")
         st.stop()
@@ -99,7 +99,7 @@ st.markdown("""
         <h1 style='font-size: 32px; margin: 0; letter-spacing: -0.7px; font-weight: 800;'>품질검사 현안 솔루션</h1>
     </div>
     <p style='margin-left: 24px; color: #718096; font-size: 17px; margin-top: 5px;'>
-        KORAIL 사규 · 기술규격 · 국가계약법 통합 검토 서비스
+        KORAIL 사규 · KRCS 기술규격 · 국가계약법 통합 검토 서비스
     </p>
     <hr style='border: 0.5px solid #edf2f7; margin: 20px 0 25px 0;'>
     """, unsafe_allow_html=True)
@@ -120,7 +120,7 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# 6. 입력 폼 (2열 레이아웃, 4항목 동일 크기)
+# 6. 입력 폼 (2열 레이아웃)
 st.markdown("<div class='input-card'>", unsafe_allow_html=True)
 st.markdown("<h3 style='color: #0054A6; font-size: 20px; margin-bottom: 20px;'>📋 현안 상황 입력</h3>", unsafe_allow_html=True)
 
@@ -178,6 +178,11 @@ if analyze_btn:
 
         try:
             response = model.generate_content(prompt)
+
+            # 디버깅: 응답 상태 확인
+            st.write("▶ response 객체:", response)
+            st.write("▶ response.text:", response.text if response else "None")
+
             if response and response.text:
                 st.markdown("### 📄 정밀 분석 결과")
                 tab1, tab2 = st.tabs(["🏛️ 분석 보고서", "📑 인용 근거 자료"])
@@ -192,5 +197,10 @@ if analyze_btn:
                         st.success(f"**활용된 법령 및 사규 데이터**\n\n{ref_data}")
                     else:
                         st.info("상세 참고 자료는 보고서 본문을 확인해 주세요.")
+            else:
+                st.error("응답이 비어있습니다. 모델 또는 API 키를 확인해주세요.")
+
         except Exception as e:
             st.error(f"분석 중 오류가 발생했습니다: {e}")
+            import traceback
+            st.code(traceback.format_exc())
