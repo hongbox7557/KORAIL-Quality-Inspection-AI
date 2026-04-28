@@ -12,7 +12,7 @@ if "GEMINI_API_KEY" not in st.secrets:
 
 try:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-    model = genai.GenerativeModel('gemini-2.0-flash-preview')
+    model = genai.GenerativeModel('gemini-2.5-flash-preview')
 except Exception as e:
     st.error(f"모델 연결 오류: {e}")
     st.stop()
