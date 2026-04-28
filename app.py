@@ -5,11 +5,10 @@ import time
 # 1. 페이지 설정 및 브라우저 탭 타이틀
 st.set_page_config(page_title="KORAIL 품질검사 솔루션", layout="wide", page_icon="🚆")
 
-# 2. API 설정 (사용자 지정: gemini-3-flash-preview)
+# 2. API 설정
 if "GOOGLE_API_KEY" in st.secrets:
     try:
         genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-        # 사용자 요청에 따라 gemini-3-flash-preview 모델로 고정
         model = genai.GenerativeModel('gemini-3-flash-preview')
     except Exception as e:
         st.error(f"모델 연결 오류: {e}")
@@ -18,7 +17,7 @@ else:
     st.error("Streamlit Secrets에 GOOGLE_API_KEY를 등록해 주세요.")
     st.stop()
 
-# 3. UI/UX 고감도 디자인 (Pretendard 폰트 및 KORAIL 브랜드 컬러 적용)
+# 3. UI/UX 디자인
 st.markdown("""
     <style>
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -26,13 +25,22 @@ st.markdown("""
     * { font-family: 'Pretendard', sans-serif !important; }
     .main { background-color: #f8f9fa; }
     
-    /* 사이드바 너비 및 스타일 */
+    /* 사이드바 토글 버튼 완전 숨기기 */
+    button[data-testid="collapsedControl"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    section[data-testid="collapsedControl"] {
+        display: none !important;
+    }
+
+    /* 사이드바 스타일 */
     section[data-testid="stSidebar"] {
         background-color: white !important;
         border-right: 1px solid #edf2f7;
     }
 
-    /* 입력창 디자인 커스텀 */
+    /* 입력창 디자인 */
     .stTextInput input, .stTextArea textarea {
         border-radius: 12px !important;
         border: 1.5px solid #d1d5db !important;
@@ -48,7 +56,7 @@ st.markdown("""
         outline: none !important;
     }
 
-    /* 분석 시작 버튼 스타일 */
+    /* 버튼 스타일 */
     .stButton>button {
         height: 60px;
         background-color: #0054A6 !important;
@@ -79,7 +87,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 4. 사이드바 (입력 인터페이스)
+# 4. 사이드바
 with st.sidebar:
     st.markdown("<h2 style='color: #0054A6; font-size: 24px; margin-bottom: 25px;'>📋 현안 상황 입력</h2>", unsafe_allow_html=True)
     
@@ -119,7 +127,6 @@ if analyze_btn:
             time.sleep(0.8)
             status.update(label="✅ 분석 완료", state="complete", expanded=False)
 
-        # AI 프롬프트 구성
         prompt = f"""
         당신은 철도 품질검사 및 공공계약 법률 전문가입니다. 아래 데이터를 바탕으로 공식적인 분석 보고서를 작성하세요.
 
@@ -143,7 +150,6 @@ if analyze_btn:
                 tab1, tab2 = st.tabs(["🏛️ 분석 보고서", "📑 인용 근거 자료"])
                 
                 with tab1:
-                    # 참고 규정 전까지의 본문 출력
                     main_content = response.text.split("[참고 규정")[0]
                     st.markdown(f"<div class='result-container'>{main_content}</div>", unsafe_allow_html=True)
                 
@@ -156,7 +162,6 @@ if analyze_btn:
         except Exception as e:
             st.error(f"분석 중 오류가 발생했습니다: {e}")
 else:
-    # 초기 메인 화면 (사용자 요청 문구 반영)
     st.markdown("""
         <div style='padding: 80px 40px; background-color: white; border-radius: 24px; border: 1px solid #edf2f7; text-align: center;'>
             <div style='font-size: 55px; margin-bottom: 25px;'>⚖️</div>
