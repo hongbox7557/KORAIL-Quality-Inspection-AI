@@ -93,10 +93,26 @@ st.markdown("""
     <p style='margin-left: 24px; color: #718096; font-size: 17px; margin-top: 5px;'>
         KORAIL 사규 · KRCS 기술규격 · 국가계약법 통합 검토 서비스
     </p>
-    <hr style='border: 0.5px solid #edf2f7; margin: 20px 0 35px 0;'>
+    <hr style='border: 0.5px solid #edf2f7; margin: 20px 0 25px 0;'>
     """, unsafe_allow_html=True)
 
-# 5. 입력 폼 (2열 레이아웃)
+# 5. 안내 문구 (입력폼 위로 이동)
+st.markdown("""
+    <div style='padding: 30px 40px; background-color: white; border-radius: 24px; border: 1px solid #edf2f7; text-align: center; margin-bottom: 30px;'>
+        <div style='font-size: 45px; margin-bottom: 15px;'>⚖️</div>
+        <h3 style='color: #0054A6; font-size: 22px; margin-bottom: 12px; font-weight: 700;'>품질검사 현안을 객관적 규정으로 지원합니다.</h3>
+        <p style='color: #4a5568; font-size: 16px; line-height: 1.8; max-width: 850px; margin: 0 auto; letter-spacing: -0.3px;'>
+            협력사와의 품질 기준 해석 차이나 난항 상황에 대해<br>
+            <b>한국철도공사 사규, 기술규격 및 국가계약법</b>을 근거로 하여<br>
+            실효성 있는 기술·법률 자문과 객관적인 가이드라인을 제공합니다.
+        </p>
+        <div style='margin-top: 15px; color: #a0aec0; font-size: 15px;'>
+            아래 입력폼에 현안 데이터를 입력한 후 분석 시작 버튼을 눌러주세요.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# 6. 입력 폼 (2열 레이아웃)
 st.markdown("<div class='input-card'>", unsafe_allow_html=True)
 st.markdown("<h3 style='color: #0054A6; font-size: 20px; margin-bottom: 20px;'>📋 현안 상황 입력</h3>", unsafe_allow_html=True)
 
@@ -122,7 +138,7 @@ analyze_btn = st.button("⚖️ 규정 기반 정밀 분석 시작", use_contain
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 6. 분석 로직 및 결과 출력
+# 7. 분석 로직 및 결과 출력
 if analyze_btn:
     if not all([item, reason, claim, goal]):
         st.warning("📊 정확한 분석을 위해 1~4번 항목을 모두 입력해 주세요.")
@@ -168,19 +184,3 @@ if analyze_btn:
                         st.info("상세 참고 자료는 보고서 본문을 확인해 주세요.")
         except Exception as e:
             st.error(f"분석 중 오류가 발생했습니다: {e}")
-
-else:
-    st.markdown("""
-        <div style='padding: 60px 40px; background-color: white; border-radius: 24px; border: 1px solid #edf2f7; text-align: center;'>
-            <div style='font-size: 55px; margin-bottom: 25px;'>⚖️</div>
-            <h3 style='color: #0054A6; font-size: 26px; margin-bottom: 20px; font-weight: 700;'>품질검사 현안을 객관적 규정으로 지원합니다.</h3>
-            <p style='color: #4a5568; font-size: 18px; line-height: 1.8; max-width: 850px; margin: 0 auto; letter-spacing: -0.3px;'>
-                협력사와의 품질 기준 해석 차이나 난항 상황에 대해<br>
-                <b>한국철도공사 사규, 기술규격 및 국가계약법</b>을 근거로 하여<br>
-                실효성 있는 기술·법률 자문과 객관적인 가이드라인을 제공합니다.
-            </p>
-            <div style='margin-top: 35px; color: #a0aec0; font-size: 16px;'>
-                위 입력폼에 현안 데이터를 입력한 후 분석 시작 버튼을 눌러주세요.
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
