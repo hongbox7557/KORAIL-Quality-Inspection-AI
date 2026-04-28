@@ -6,7 +6,7 @@ st.set_page_config(page_title="품질검사 법률/기술 자문 시스템", pag
 
 # 2. API 설정 (Streamlit Secrets 사용)
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('models/gemini-1.5-flash')
 
 # 3. 메인 화면 헤더 및 설명
 st.title("⚖️ 품질검사 현안 자문 시스템")
