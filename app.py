@@ -43,6 +43,14 @@ st.markdown("""
         outline: none !important;
     }
 
+    /* 모든 textarea 높이 강제 통일 */
+    .stTextArea textarea {
+        height: 150px !important;
+        min-height: 150px !important;
+        max-height: 150px !important;
+        resize: none !important;
+    }
+
     /* 버튼 스타일 */
     .stButton>button {
         height: 60px;
@@ -96,7 +104,7 @@ st.markdown("""
     <hr style='border: 0.5px solid #edf2f7; margin: 20px 0 25px 0;'>
     """, unsafe_allow_html=True)
 
-# 5. 안내 문구 (입력폼 위로 이동)
+# 5. 안내 문구
 st.markdown("""
     <div style='padding: 30px 40px; background-color: white; border-radius: 24px; border: 1px solid #edf2f7; text-align: center; margin-bottom: 30px;'>
         <div style='font-size: 45px; margin-bottom: 15px;'>⚖️</div>
@@ -112,25 +120,27 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# 6. 입력 폼 (2열 레이아웃)
+# 6. 입력 폼 (2열 레이아웃, 4항목 동일 크기)
 st.markdown("<div class='input-card'>", unsafe_allow_html=True)
 st.markdown("<h3 style='color: #0054A6; font-size: 20px; margin-bottom: 20px;'>📋 현안 상황 입력</h3>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
-    item = st.text_input("1. 검사 대상 품목", placeholder="예: 차량용 윤축, 선로전환기 모터 등")
+    item = st.text_area("1. 검사 대상 품목",
+                        placeholder="예: 차량용 윤축, 선로전환기 모터 등",
+                        height=150)
     reason = st.text_area("2. 검사 불합격 및 지적 사유 (공사 입장)",
                           placeholder="기술규격서(KRCS 등) 위반 사항이나 승인 도면과 상이한 부분을 구체적으로 기술",
-                          height=180)
+                          height=150)
 
 with col2:
     claim = st.text_area("3. 협력사 주장 내용",
                          placeholder="협력사가 제기하는 이의 신청 사유 또는 현장 여건상의 불가피성",
-                         height=180)
+                         height=150)
     goal = st.text_area("4. 현재 난항 지점 및 목표",
                         placeholder="상호 이견이 있는 핵심 쟁점 및 해결하고자 하는 목표",
-                        height=180)
+                        height=150)
 
 st.markdown("</div>", unsafe_allow_html=True)
 
