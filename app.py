@@ -20,7 +20,7 @@ genai.configure(api_key=api_key)
 # 3. 모델 설정 (AI Studio의 지침과 설정을 이식)
 # 품질검사의 객관성을 위해 도출 온도를 낮게(0.2) 설정하는 것이 핵심입니다.
 model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
+    model_name="gemini-3.0-flash-preview",
     generation_config={
         "temperature": 0.2,
         "top_p": 0.95,
