@@ -24,10 +24,10 @@ st.markdown("### 📝 분석 상황 입력")
 st.caption("정확하고 객관적인 자문을 위해, 아래 4가지 항목에 상세한 내용을 입력해주세요.")
 
 with st.form("inspection_form"):
-    item_name = st.text_input("1. 검사 대상 품목", placeholder="예: 객차용 제동패드")
-    issue_reason = st.text_area("2. 검사 불합격 및 지적 사유 (공사 입장)", placeholder="규격서 제7조 미흡 등...")
-    partner_claim = st.text_area("3. 협력사 주장 내용", placeholder="제조 공정상 불가피함 등...")
-    goal = st.text_area("4. 현재 난항 지점 및 목표", placeholder="공정성 확보 및 납기 준수 방안 등...")
+    item_name = st.text_input("1. 검사 대상 품목", placeholder="예: 객차용 제동패드 등")
+    issue_reason = st.text_area("2. 검사 불합격 및 지적 사유 (공사 입장)", placeholder="규격서 제7조 미흡 등")
+    partner_claim = st.text_area("3. 협력사 주장 내용", placeholder="제조 공정상 불가피함 등")
+    goal = st.text_area("4. 현재 난항 지점 및 목표", placeholder="공정성 확보 및 납기 준수 방안 등")
     
     submit_button = st.form_submit_button("규정 기반 분석 시작")
 
