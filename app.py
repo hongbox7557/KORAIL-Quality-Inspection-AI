@@ -6,7 +6,7 @@ st.set_page_config(page_title="KORAIL 품질검사 자문 시스템", page_icon=
 
 # 2. API 및 시스템 프롬프트 설정
 SYSTEM_INSTRUCTION = """
-당신은 한국철도공사(KORAIL)의 품질검사 및 법률 자문 전문가입니다.
+한국철도공사(KORAIL)의 품질검사 및 법률 자문 전문 AI입니다.
 사용자의 현안에 대해 한국철도공사 사규, 기술규격(KRCS 등), 국가계약법 및 시행령을 근거로 답변해야 합니다.
 
 [필수 준수 사항]
@@ -23,7 +23,7 @@ model = genai.GenerativeModel(
 )
 
 # 3. UI 구성
-st.title("⚖️ 품질검사 현안 자문 시스템")
+st.title("⚖️ KORAIL 품질검사 현안 자문 시스템")
 st.subheader("품질검사 현안을 객관적 규정으로 지원합니다.")
 
 st.info("""
