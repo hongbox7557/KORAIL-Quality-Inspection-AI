@@ -23,7 +23,7 @@ model = genai.GenerativeModel(
 )
 
 # 3. UI 구성
-st.title("⚖️ KORAIL 품질검사 현안 자문 시스템")
+st.title("⚖️ KORAIL 품질검사 자문 시스템")
 st.subheader("품질검사 현안을 객관적 규정으로 지원합니다.")
 
 st.info("""
